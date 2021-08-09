@@ -16,47 +16,43 @@ def julia(max, comp):
     
     return max
 
-def bet_julia(list,r_dict,p_num):
-    # print("julia_start. {}".format(os.getpid()))
+def julia_b(list,r_dict,p_num):
     julia_list = []
     for i, c_point in enumerate(list):
         julia_list.append(julia(200, c_point))
-    # print("julia_end. {}".format(os.getpid()))
     r_dict[p_num] = julia_list
 
 
 def main():
     pic_size = 1000
-    # print("start. {}".format(os.getpid()))
     re = np.linspace(-2, 2, pic_size)
     im = np.linspace(2, -2, pic_size)
 
     Re, Im = np.meshgrid(re, im)
     comp = np.c_[Re.ravel(), Im.ravel()]
 
-    slicenum = 8
-    testt = len(comp)//slicenum
+    slice = 8
+    test = len(comp)//slice
     slice_list = []
-    for y in range(slicenum):
-        slice_list.append(comp[testt*y:testt*(y+1)])
+    for y in range(slice):
+        slice_list.append(comp[test*y:test*(y+1)])
 
     J = []
     process_list = []
-    result_list = [0]*slicenum
+    result_list = [0]*slice
     manager = Manager()
     return_dict = manager.dict()
 
-
     start = time.time()
-    for p in range(slicenum):
-        process = Process(target=bet_julia,kwargs={'list':slice_list[p],'r_dict':return_dict,'p_num':p})
+    for p in range(slice):
+        process = Process(target=julia_b,kwargs={'list':slice_list[p],'r_dict':return_dict,'p_num':p})
         process_list.append(process)
         process.start()
     
     for j in process_list:
         j.join()
     
-    for n in range(slicenum):
+    for n in range(slice):
         result_list[n] = return_dict[n]
     
     for i in result_list:
